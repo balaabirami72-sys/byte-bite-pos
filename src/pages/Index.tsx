@@ -13,15 +13,17 @@ type Tab = 'menu' | 'admin' | 'reports';
 
 const Index = () => {
   const { menuItems, addToCart, cart } = useStore();
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const [tab, setTab] = useState<Tab>('menu');
   const [mobileCartOpen, setMobileCartOpen] = useState(false);
+  const [, force] = useState(0);
 
   const cartCount = cart.reduce((s, c) => s + c.quantity, 0);
+  const adminUnlocked = isAdminUnlocked();
 
-  const tabs: { key: Tab; label: string; icon: React.ReactNode; adminOnly?: boolean }[] = [
+  const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
     { key: 'menu', label: 'Menu', icon: <LayoutGrid className="h-5 w-5" /> },
-    { key: 'admin', label: 'Admin', icon: <Settings className="h-5 w-5" />, adminOnly: true },
+    { key: 'admin', label: 'Admin', icon: <Settings className="h-5 w-5" /> },
     { key: 'reports', label: 'Reports', icon: <BarChart3 className="h-5 w-5" /> },
   ];
 
