@@ -6,7 +6,8 @@ import MenuCard from '@/components/MenuCard';
 import CartPanel from '@/components/CartPanel';
 import AdminPanel from '@/components/AdminPanel';
 import ReportsPanel from '@/components/ReportsPanel';
-import { UtensilsCrossed, LayoutGrid, Settings, BarChart3, ShoppingCart, X, LogIn, LogOut, Lock } from 'lucide-react';
+import AdminGate, { lockAdmin, isAdminUnlocked } from '@/components/AdminGate';
+import { UtensilsCrossed, LayoutGrid, Settings, BarChart3, ShoppingCart, X, LogIn, LogOut, Unlock } from 'lucide-react';
 
 type Tab = 'menu' | 'admin' | 'reports';
 
