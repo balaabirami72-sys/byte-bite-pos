@@ -1,23 +1,26 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useStore } from '@/store/useStore';
+import { useAuth } from '@/hooks/useAuth';
 import MenuCard from '@/components/MenuCard';
 import CartPanel from '@/components/CartPanel';
 import AdminPanel from '@/components/AdminPanel';
 import ReportsPanel from '@/components/ReportsPanel';
-import { UtensilsCrossed, LayoutGrid, Settings, BarChart3, ShoppingCart, X } from 'lucide-react';
+import { UtensilsCrossed, LayoutGrid, Settings, BarChart3, ShoppingCart, X, LogIn, LogOut, Lock } from 'lucide-react';
 
 type Tab = 'menu' | 'admin' | 'reports';
 
 const Index = () => {
   const { menuItems, addToCart, cart } = useStore();
+  const { user, isAdmin, signOut } = useAuth();
   const [tab, setTab] = useState<Tab>('menu');
   const [mobileCartOpen, setMobileCartOpen] = useState(false);
 
   const cartCount = cart.reduce((s, c) => s + c.quantity, 0);
 
-  const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
+  const tabs: { key: Tab; label: string; icon: React.ReactNode; adminOnly?: boolean }[] = [
     { key: 'menu', label: 'Menu', icon: <LayoutGrid className="h-5 w-5" /> },
-    { key: 'admin', label: 'Admin', icon: <Settings className="h-5 w-5" /> },
+    { key: 'admin', label: 'Admin', icon: <Settings className="h-5 w-5" />, adminOnly: true },
     { key: 'reports', label: 'Reports', icon: <BarChart3 className="h-5 w-5" /> },
   ];
 
