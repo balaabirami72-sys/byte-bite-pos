@@ -101,29 +101,15 @@ const Index = () => {
             </div>
           )}
           {tab === 'admin' && (
-            isAdmin ? (
+            <AdminGate title="Admin – Edit Menu">
               <AdminPanel />
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary">
-                  <Lock className="h-7 w-7 text-muted-foreground" />
-                </div>
-                <h2 className="text-xl font-bold">Admin access only</h2>
-                <p className="text-muted-foreground max-w-sm">
-                  Only administrators can edit the menu and prices.
-                </p>
-                {!user && (
-                  <Link
-                    to="/auth"
-                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
-                  >
-                    <LogIn className="h-4 w-4" /> Sign in as admin
-                  </Link>
-                )}
-              </div>
-            )
+            </AdminGate>
           )}
-          {tab === 'reports' && <ReportsPanel />}
+          {tab === 'reports' && (
+            <AdminGate title="Admin – Sales Reports">
+              <ReportsPanel />
+            </AdminGate>
+          )}
         </main>
 
         {/* Desktop cart */}
