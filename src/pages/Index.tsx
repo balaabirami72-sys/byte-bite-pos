@@ -1,23 +1,26 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useStore } from '@/store/useStore';
+import { useAuth } from '@/hooks/useAuth';
 import MenuCard from '@/components/MenuCard';
 import CartPanel from '@/components/CartPanel';
 import AdminPanel from '@/components/AdminPanel';
 import ReportsPanel from '@/components/ReportsPanel';
-import { UtensilsCrossed, LayoutGrid, Settings, BarChart3, ShoppingCart, X } from 'lucide-react';
+import { UtensilsCrossed, LayoutGrid, Settings, BarChart3, ShoppingCart, X, LogIn, LogOut, Lock } from 'lucide-react';
 
 type Tab = 'menu' | 'admin' | 'reports';
 
 const Index = () => {
   const { menuItems, addToCart, cart } = useStore();
+  const { user, isAdmin, signOut } = useAuth();
   const [tab, setTab] = useState<Tab>('menu');
   const [mobileCartOpen, setMobileCartOpen] = useState(false);
 
   const cartCount = cart.reduce((s, c) => s + c.quantity, 0);
 
-  const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
+  const tabs: { key: Tab; label: string; icon: React.ReactNode; adminOnly?: boolean }[] = [
     { key: 'menu', label: 'Menu', icon: <LayoutGrid className="h-5 w-5" /> },
-    { key: 'admin', label: 'Admin', icon: <Settings className="h-5 w-5" /> },
+    { key: 'admin', label: 'Admin', icon: <Settings className="h-5 w-5" />, adminOnly: true },
     { key: 'reports', label: 'Reports', icon: <BarChart3 className="h-5 w-5" /> },
   ];
 
@@ -32,33 +35,56 @@ const Index = () => {
           <h1 className="text-xl font-bold text-foreground">FoodPOS</h1>
         </div>
         <nav className="flex gap-1">
-          {tabs.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                tab === t.key
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-secondary hover:text-secondary-foreground'
-              }`}
-            >
-              {t.icon}
-              <span className="hidden sm:inline">{t.label}</span>
-            </button>
-          ))}
+          {tabs.map((t) => {
+            const locked = t.adminOnly && !isAdmin;
+            return (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                  tab === t.key
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-secondary hover:text-secondary-foreground'
+                }`}
+              >
+                {locked ? <Lock className="h-4 w-4" /> : t.icon}
+                <span className="hidden sm:inline">{t.label}</span>
+              </button>
+            );
+          })}
         </nav>
-        {/* Mobile cart toggle */}
-        <button
-          onClick={() => setMobileCartOpen(!mobileCartOpen)}
-          className="relative lg:hidden flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-secondary-foreground"
-        >
-          <ShoppingCart className="h-5 w-5" />
-          {cartCount > 0 && (
-            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-              {cartCount}
-            </span>
+        <div className="flex items-center gap-2">
+          {user ? (
+            <button
+              onClick={signOut}
+              className="hidden sm:flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary"
+              title={user.email ?? ''}
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="hidden md:inline">Sign out</span>
+            </button>
+          ) : (
+            <Link
+              to="/auth"
+              className="hidden sm:flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary"
+            >
+              <LogIn className="h-4 w-4" />
+              <span className="hidden md:inline">Sign in</span>
+            </Link>
           )}
-        </button>
+          {/* Mobile cart toggle */}
+          <button
+            onClick={() => setMobileCartOpen(!mobileCartOpen)}
+            className="relative lg:hidden flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-secondary-foreground"
+          >
+            <ShoppingCart className="h-5 w-5" />
+            {cartCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                {cartCount}
+              </span>
+            )}
+          </button>
+        </div>
       </header>
 
       {/* Body */}
@@ -72,7 +98,29 @@ const Index = () => {
               ))}
             </div>
           )}
-          {tab === 'admin' && <AdminPanel />}
+          {tab === 'admin' && (
+            isAdmin ? (
+              <AdminPanel />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary">
+                  <Lock className="h-7 w-7 text-muted-foreground" />
+                </div>
+                <h2 className="text-xl font-bold">Admin access only</h2>
+                <p className="text-muted-foreground max-w-sm">
+                  Only administrators can edit the menu and prices.
+                </p>
+                {!user && (
+                  <Link
+                    to="/auth"
+                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+                  >
+                    <LogIn className="h-4 w-4" /> Sign in as admin
+                  </Link>
+                )}
+              </div>
+            )
+          )}
           {tab === 'reports' && <ReportsPanel />}
         </main>
 
