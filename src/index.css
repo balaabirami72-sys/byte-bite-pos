@@ -97,3 +97,9 @@
     box-shadow: 0 8px 30px -4px hsl(25 95% 53% / 0.18), 0 2px 8px hsl(0 0% 0% / 0.08);
   }
 }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}

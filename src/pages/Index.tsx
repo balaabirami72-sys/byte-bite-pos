@@ -6,21 +6,24 @@ import MenuCard from '@/components/MenuCard';
 import CartPanel from '@/components/CartPanel';
 import AdminPanel from '@/components/AdminPanel';
 import ReportsPanel from '@/components/ReportsPanel';
-import { UtensilsCrossed, LayoutGrid, Settings, BarChart3, ShoppingCart, X, LogIn, LogOut, Lock } from 'lucide-react';
+import AdminGate, { lockAdmin, isAdminUnlocked } from '@/components/AdminGate';
+import { UtensilsCrossed, LayoutGrid, Settings, BarChart3, ShoppingCart, X, LogIn, LogOut, Unlock } from 'lucide-react';
 
 type Tab = 'menu' | 'admin' | 'reports';
 
 const Index = () => {
   const { menuItems, addToCart, cart } = useStore();
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const [tab, setTab] = useState<Tab>('menu');
   const [mobileCartOpen, setMobileCartOpen] = useState(false);
+  const [, force] = useState(0);
 
   const cartCount = cart.reduce((s, c) => s + c.quantity, 0);
+  const adminUnlocked = isAdminUnlocked();
 
-  const tabs: { key: Tab; label: string; icon: React.ReactNode; adminOnly?: boolean }[] = [
+  const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
     { key: 'menu', label: 'Menu', icon: <LayoutGrid className="h-5 w-5" /> },
-    { key: 'admin', label: 'Admin', icon: <Settings className="h-5 w-5" />, adminOnly: true },
+    { key: 'admin', label: 'Admin', icon: <Settings className="h-5 w-5" /> },
     { key: 'reports', label: 'Reports', icon: <BarChart3 className="h-5 w-5" /> },
   ];
 
@@ -36,7 +39,6 @@ const Index = () => {
         </div>
         <nav className="flex gap-1">
           {tabs.map((t) => {
-            const locked = t.adminOnly && !isAdmin;
             return (
               <button
                 key={t.key}
@@ -47,13 +49,23 @@ const Index = () => {
                     : 'text-muted-foreground hover:bg-secondary hover:text-secondary-foreground'
                 }`}
               >
-                {locked ? <Lock className="h-4 w-4" /> : t.icon}
+                {t.icon}
                 <span className="hidden sm:inline">{t.label}</span>
               </button>
             );
           })}
         </nav>
         <div className="flex items-center gap-2">
+          {adminUnlocked && (
+            <button
+              onClick={() => { lockAdmin(); force((n) => n + 1); }}
+              className="hidden sm:flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-primary hover:bg-secondary"
+              title="Lock admin"
+            >
+              <Unlock className="h-4 w-4" />
+              <span className="hidden md:inline">Lock admin</span>
+            </button>
+          )}
           {user ? (
             <button
               onClick={signOut}
@@ -99,29 +111,15 @@ const Index = () => {
             </div>
           )}
           {tab === 'admin' && (
-            isAdmin ? (
+            <AdminGate title="Admin – Edit Menu">
               <AdminPanel />
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary">
-                  <Lock className="h-7 w-7 text-muted-foreground" />
-                </div>
-                <h2 className="text-xl font-bold">Admin access only</h2>
-                <p className="text-muted-foreground max-w-sm">
-                  Only administrators can edit the menu and prices.
-                </p>
-                {!user && (
-                  <Link
-                    to="/auth"
-                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
-                  >
-                    <LogIn className="h-4 w-4" /> Sign in as admin
-                  </Link>
-                )}
-              </div>
-            )
+            </AdminGate>
           )}
-          {tab === 'reports' && <ReportsPanel />}
+          {tab === 'reports' && (
+            <AdminGate title="Admin – Sales Reports">
+              <ReportsPanel />
+            </AdminGate>
+          )}
         </main>
 
         {/* Desktop cart */}
