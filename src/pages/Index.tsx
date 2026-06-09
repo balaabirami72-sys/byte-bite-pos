@@ -39,7 +39,6 @@ const Index = () => {
         </div>
         <nav className="flex gap-1">
           {tabs.map((t) => {
-            const locked = t.adminOnly && !isAdmin;
             return (
               <button
                 key={t.key}
@@ -50,7 +49,7 @@ const Index = () => {
                     : 'text-muted-foreground hover:bg-secondary hover:text-secondary-foreground'
                 }`}
               >
-                {locked ? <Lock className="h-4 w-4" /> : t.icon}
+                {t.icon}
                 <span className="hidden sm:inline">{t.label}</span>
               </button>
             );
